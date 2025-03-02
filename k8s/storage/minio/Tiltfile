@@ -1,0 +1,48 @@
+NAMESPACE        = 'minio-local'
+NAMESPACE_CRD    = 'minio-local-minio-crd' # minio hack
+INGRESS          = 'microk8s'
+
+CATEGORY_CLUSTER = 'Cluster'
+CATEGORY_DB      = 'Databases-DB'
+CATEGORY_INFRA   = 'Infra'
+CATEGORY_LOCAL   = 'Local'
+
+
+load('ext://namespace', 'namespace_create', 'namespace_inject')
+load('ext://helm_resource', 'helm_resource', 'helm_repo')
+# docker build with restart
+# load('ext://restart_process', 'docker_build_with_restart')
+
+namespace_create('{}'.format(NAMESPACE))
+namespace_create('{}'.format(NAMESPACE_CRD))
+
+
+helm_repo('bitnami', 'https://charts.bitnami.com/bitnami', labels=[CATEGORY_CLUSTER])
+helm_repo('minio-repo', 'https://operator.min.io', labels=[CATEGORY_CLUSTER])
+
+## MINIO
+
+helm_resource(
+  name='minio-operator',
+  chart='minio-repo/operator',
+  resource_deps=['minio-repo'],
+  flags=[
+  ],
+  port_forwards=[],
+  namespace='{}'.format(NAMESPACE_CRD),
+  labels=[CATEGORY_DB])
+
+helm_resource(
+  name='minio-tenant',
+  chart='minio-repo/tenant',
+  resource_deps=['minio-repo','minio-operator'],
+  flags=[
+     '--values=./tenant-values.yaml',
+  ],
+  port_forwards=[
+    port_forward(9000, 9000, name='S3 API'),
+    #port_forward(433, 8433, name='Minio Server'),
+    port_forward(9443, 9443, name='Console')
+  ],
+  namespace='{}'.format(NAMESPACE),
+  labels=[CATEGORY_DB])

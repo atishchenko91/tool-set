@@ -1,0 +1,117 @@
+tenant:
+  name: test
+  image:
+    repository: quay.io/minio/minio
+    tag: RELEASE.2024-11-07T00-52-20Z
+    pullPolicy: IfNotPresent
+
+  imagePullSecret: { }
+  initContainers: [ ]
+  scheduler: { }
+  configuration:
+    name: myminio-env-configuration
+
+  configSecret:
+    name: myminio-env-configuration
+    accessKey: minio
+    secretKey: minio123
+
+  poolsMetadata:
+    annotations: { }
+    labels: { }
+
+  pools:
+    - servers: 1
+      name: pool-0
+      volumesPerServer: 1
+      size: 1Gi
+      storageAnnotations: { }
+      storageLabels: { }
+      annotations: { }
+      labels: { }
+      tolerations: [ ]
+      nodeSelector: { }
+      affinity: { }
+      resources: { }
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: "OnRootMismatch"
+        runAsNonRoot: true
+      containerSecurityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints: [ ]
+      env:
+        - name: MINIO_NOTIFY_WEBHOOK_ENABLE
+          value: "on"
+        - name: MINIO_NOTIFY_WEBHOOK_ENDPOINT
+          value: "http://192.168.0.96:8083/minio-state/web-hook"
+  mountPath: /export
+
+  subPath: /data
+
+  metrics:
+    enabled: false
+    port: 9000
+    protocol: http
+
+  certificate:
+    externalCaCertSecret: [ ]
+    externalCertSecret: [ ]
+    requestAutoCert: true
+    certConfig: { }
+  features:
+    bucketDNS: false
+    domains: { }
+    enableSFTP: false
+  buckets: [ ]
+  users: [ ]
+  podManagementPolicy: Parallel
+  liveness: { }
+  readiness: { }
+  startup: { }
+  lifecycle: { }
+  exposeServices: { }
+  serviceAccountName: ""
+  prometheusOperator: false
+  logging: { }
+  serviceMetadata: { }
+  env:
+    - name: MINIO_NOTIFY_WEBHOOK_ENABLE
+      value: "1"
+    - name: MINIO_NOTIFY_WEBHOOK_ENDPOINT
+      value: http://192.168.0.96:8083/minio-state/web-hook
+    - name: MINIO_NOTIFY_WEBHOOK_QUEUE_LIMIT
+      value: "1000"
+  priorityClassName: ""
+  additionalVolumes: [ ]
+  additionalVolumeMounts: [ ]
+
+ingress:
+  api:
+    enabled: false
+    ingressClassName: ""
+    labels: { }
+    annotations: { }
+    tls: [ ]
+    host: minio.local
+    path: /
+    pathType: Prefix
+  console:
+    enabled: false
+    ingressClassName: ""
+    labels: { }
+    annotations: { }
+    tls: [ ]
+    host: minio-console.local
+    path: /
+    pathType: Prefix

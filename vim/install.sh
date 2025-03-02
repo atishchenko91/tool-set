@@ -7,4 +7,4 @@ git clone https://github.com/preservim/nerdtree.git ~/.vim/bundle/nerdtree
 
 echo "replace ~/.vimrc"
 cp ./.vimrc ~/.vimrc
-echo "done"
+echo "done replace ~/.vimrc"
